@@ -57,7 +57,7 @@ interface
 
 uses
   SysUtils, Classes, SyncObjs, FmtBCD,
-  ZCompatibility, ZSysUtils
+  ZCompatibility, ZSysUtils, ZGitVersion
   {$IF defined(MSWINDOWS) and not defined(FPC)}, Windows{$IFEND} //some old comp. -> INFINITE
   {$IFDEF NO_UNIT_CONTNRS},System.Generics.Collections{$ENDIF};
 
@@ -81,7 +81,7 @@ const
                  {$ELSE}
                  Char(48+ZEOS_SUB_VERSION)+'-'+
                  {$IFEND}
-                 ZEOS_STATUS;
+                 ZEOS_GITVERSION;
 
 type
   {$IFDEF OLDFPC}
