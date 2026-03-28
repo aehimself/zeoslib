@@ -124,6 +124,7 @@ type
     procedure TestInfinityNan;
     procedure TestSF611_1;
     procedure TestSF611_2;
+    procedure TestSF647;
   end;
 
   TZTestCompPostgreSQLBugReportMBCs = class(TZAbstractCompSQLTestCaseMBCs)
@@ -1708,7 +1709,37 @@ begin
   end;
 end;
 
-
+procedure TZTestCompPostgreSQLBugReport.TestSF647;
+var
+  Query: TZQuery;
+  uuidstr: String;
+  uuid: TGUID;
+begin
+  Query := CreateQuery;
+  try
+    Query.Connection.Connect;
+    Query.Connection.ExecuteDirect('delete from guid_test where id in (2026021301, 2026021301)');
+    Query.Connection.ExecuteDirect('insert into guid_test (id, guid) values (2026021301, ''{783DAE87-E33E-4314-8730-398ED525F07B}'')');
+    Query.SQL.Text := 'select * from guid_test where id in (2026021301, 2026021302)';
+    Query.Open;
+    CheckEquals('{783DAE87-E33E-4314-8730-398ED525F07B}', Query.FieldByName('GUID').AsString, 'Read GUID from Database, inserted via SQL Text.');
+    Query.Append;
+    Query.FieldByName('id').AsInteger := 2026021302;
+    uuidstr := '{783DAE87-E33E-4314-8730-398ED525F07B}';
+    uuid := StringToGUID(uuidstr);
+    (Query.FieldByName('guid') as TGuidField).AsGuid  := uuid;
+    Query.FieldByName('guid').AsString := uuidstr;
+    Query.Post;
+    Query.Close;
+    Query.SQL.Text := 'select * from guid_test where id = 2026021302';
+    Query.Open;
+    CheckEquals(2026021302, Query.FieldByName('ID').AsInteger);
+    CheckEquals(uuid, (Query.FieldByName('guid') as TGuidField).AsGuid);
+    Query.Close;
+  finally
+    FreeAndNil(Query);
+  end;
+end;
 
 initialization
   RegisterTest('bugreport',TZTestCompPostgreSQLBugReport.Suite);

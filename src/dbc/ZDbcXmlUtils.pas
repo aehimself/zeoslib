@@ -265,6 +265,7 @@ var
   MD: IZResultSetMetadata;
   Rows: TStringList;
 begin
+  //CF := []; // this leads to problems on older Delphis
   if RS.GetType <> rtForwardOnly then
     RS.MoveAbsolute(0);
   if not RS.IsAfterLast then begin
